@@ -1,4 +1,5 @@
-//USEUNIT JSON
+//USEUNIT JSON (basically a copy of Crockfords json2.js)
+//conversion of the java code from http://www.mcdowella.demon.co.uk/allPairs.html
 
 function generateTests() { 
     var MSExcel = Sys.OleObject("excel.application");
