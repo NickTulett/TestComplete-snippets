@@ -1,29 +1,30 @@
 var parameterNames = [];
 var pairCount = 0;
-var poolSize = 3; // number of candidate testSet arrays to generate before picking one to add to testSets List
+var poolSize = 1; // number of candidate testSet arrays to generate before picking one to add to testSets List
 
 var parameterValues = []; // one-dimensional array of all parameter values
-var allPairsDisplay = []; // rectangular array; does not change, used to generate unusedCounts array
 var unusedPairs = []; // changes
 var unusedPairsSearch = []; // square array -- changes
 var testSets = []; // the main result data structure
 
 var conditions = [
-// 	["Testing", "1", "2", "3"],
-// 	["RainbowColours", "red", "orange", "yellow", "green", "blue", "indigo", "violet"],
-// 	["Rainbow", "George", "Geoffrey", "Bungle", "Zippy"],
-// 	["Well", "yes", "no"]
-// ];
-["Redundancy", "P0", "P1", "P99", "P100", "P101", "N0", "N-", "N=", "N+"],
-["Strategy", "S", "E"],
-["Trigger Load", "0", "75", "100", "101"],
-["Groupsize", "0", "1", "2", "8", "999"],
-["ZeroLoad", "Y", "N"],
-["Chart", "L", "E", "DS"],
-["Idle State", "Off", "Idle", "On"],
-["Standby", "Off", "Idle", "On"],
-["Passive", "Off", "Idle", "On"]
+	["Testing", "1", "2", "3"],
+	// ["RainbowColours", "red", "orange", "yellow", "green", "blue", "indigo", "violet"],
+	// ["Rainbow", "George", "Geoffrey", "Bungle", "Zippy"],
+	["Well", "yes", "no"],
+	// ["Redundancy", "P0", "P1", "P99", "P100", "P101", "N0", "N-", "N=", "N+"],
+	 ["Strategy", "S", "E"]//,
+	// ["Trigger Load", "0", "75", "100", "101"],
+	// ["Groupsize", "0", "1", "2", "8", "999"],
+	// ["ZeroLoad", "Y", "N"],
+	// ["Chart", "L", "E", "DS"],
+	// ["Idle State", "Off", "Idle", "On"],
+	// ["Standby", "Off", "Idle", "On"],
+	// ["Passive", "Off", "Idle", "On"]
 ];
+
+
+var startTime = new Date();
 conditions.sort(function (a,b) {//most efficient with lowest weight first
     return a.length - b.length;
 });
@@ -32,7 +33,7 @@ var parameterCount = conditions.length;
 console.log("\nBegin pair-wise testset generation\n");
 //console.log("\nInput file = " + file + "\n");
 
-var allPairs = [];
+var pairGroups = [];
 var currPair = 0;
 var parameterValueSets = getParameterValueSets();
 processParameterValueSets();
@@ -68,36 +69,35 @@ function getParameterValueSets() {
 //==================================================================================	
 function buildPairs (groupIndex, pairIndex) {
 	parameterValueSets[groupIndex].forEach(function (groupItem) {
-        allPairs[groupItem] = allPairs[groupItem] || {"group": pairIndex, "count": 0, "pairs": []};
+        pairGroups[groupItem] = pairGroups[groupItem] || {"group": pairIndex, "count": 0, "pairs": []};
 		parameterValueSets[pairIndex].forEach(function (pairItem){
-	        allPairs[pairItem] = allPairs[pairItem] || {"group": pairIndex, "count": 0, "pairs": []};
-			allPairsDisplay[currPair] = [groupItem, pairItem];
+	        pairGroups[pairItem] = pairGroups[pairItem] || {"group": pairIndex, "count": 0, "pairs": []};
 			unusedPairs.push([groupItem, pairItem]);
 			unusedPairsSearch[groupItem] = unusedPairsSearch[groupItem] || [];
 			unusedPairsSearch[groupItem][pairItem] = 1;
-	        allPairs[groupItem].pairs.push(pairItem);
-	        allPairs[groupItem].count++;
-	        allPairs[pairItem].count++;
+	        pairGroups[groupItem].pairs.push(pairItem);
+	        pairGroups[groupItem].count++;
+	        pairGroups[pairItem].count++;
 			++currPair;
 		});
 	});
 }
 function buildGroup(groupIndex) {
+	//pairCount = (p0l.p1l + p0l.p2l +... p0l.pnl) + (p1l.p2l +... p1l.pnl) +... (...+pn-1l.pnl)
 	for (var pairIndex = groupIndex + 1; pairIndex <= parameterCount - 1; ++pairIndex) {
         pairCount += (parameterValueSets[groupIndex].length * parameterValueSets[pairIndex].length);
 		buildPairs(groupIndex, pairIndex);
 	}
 }
 function processParameterValueSets () {
-// process the parameterValueSets array to populate the allPairsDisplay & unusedPairs & unusedPairsSearch collections
+// process the parameterValueSets array to populate the unusedPairs & unusedPairsSearch collections
 	for (var groupIndex = 0; groupIndex <= parameterCount - 2; ++groupIndex) {
 		buildGroup(groupIndex);
 	} // i
     console.log("\nThere are " + pairCount + " pairs ");
-    console.log(JSON.stringify(allPairs));
-    console.log(JSON.stringify(allPairsDisplay));
-    //console.log(JSON.stringify(unusedPairs));
-    //console.log(JSON.stringify(unusedPairsSearch));
+    console.log("pairGroups: " + JSON.stringify(pairGroups));
+    console.log("unusedPairs: " + JSON.stringify(unusedPairs));
+    console.log("unusedPairsSearch: " + JSON.stringify(unusedPairsSearch));
 }
 //==================================================================================
 function getParameterPositions () {
@@ -108,21 +108,18 @@ function getParameterPositions () {
 			parameterPositions[k++] = i;
 		});
 	});
-    console.log(JSON.stringify("parameterPositions"));
+    console.log("parameterPositions");
     console.log(JSON.stringify(parameterPositions));
     return parameterPositions;
 }
 //==================================================================================
 function getUnusedCounts () {
-	// process allPairsDisplay to determine unusedCounts array
 	var unusedCounts = [];
-	for (var i = 0, apdl = allPairsDisplay.length; i < apdl; ++i) {
-		unusedCounts[allPairsDisplay[i][0]] = unusedCounts[allPairsDisplay[i][0]] || 0;
-		++unusedCounts[allPairsDisplay[i][0]];
-		unusedCounts[allPairsDisplay[i][1]] = unusedCounts[allPairsDisplay[i][1]] || 0;
-		++unusedCounts[allPairsDisplay[i][1]];
+    for (var i = 0, l = unusedPairs.length; i < l; ++i) {
+		unusedCounts[unusedPairs[i][0]] = (unusedCounts[unusedPairs[i][0]] || 0) + 1;
+		unusedCounts[unusedPairs[i][1]] = (unusedCounts[unusedPairs[i][1]] || 0) + 1;
 	}
-    console.log(JSON.stringify("unusedCounts"));
+	console.log("unusedCounts");
     console.log(JSON.stringify(unusedCounts));
     return unusedCounts;
 }
@@ -144,7 +141,6 @@ function shuffleCandidates (candidate, firstPos, secondPos) {
         shuffle.reverse();
         ordered = ordered.concat(shuffle);
     }
-    //console.log("*R*" + JSON.stringify(ordered));
     return ordered;
 }
 function getConditionWithMostPairs(possibleValues, orderedIndex, testSet, ordered) {
@@ -172,13 +168,14 @@ function getConditionWithMostPairs(possibleValues, orderedIndex, testSet, ordere
 	return bestPossibleValue;
 } 
 function getCandidateSets () {
+	function sortByUnusedCount(a, b){
+		return ((unusedCounts[a[0]] + unusedCounts[a[1]]) - (unusedCounts[b[0]] + unusedCounts[b[1]]));
+	}	
 	var candidateSets = [];// holds candidate testSets
 	for (var candidate = 0; candidate < poolSize; ++candidate) {
 		var testSet = [];// make an empty candidate testSet
-		var bestPair = unusedPairs.sort(function (a, b){
-			return ((unusedCounts[a[0]] + unusedCounts[a[1]]) - (unusedCounts[b[0]] + unusedCounts[b[1]]));
-		})[0];
-//			console.log("Best pair is " + best[0] + ", " + best[1] + " at " + indexOfBestPair + " with weight " + bestWeight);
+		var bestPair = unusedPairs.sort(sortByUnusedCount)[0];
+		console.log("Best pair is " + bestPair[0] + ", " + bestPair[1]);
 		var firstPos = parameterPositions[bestPair[0]]; // position of first value from best unused pair
 		var secondPos = parameterPositions[bestPair[1]];
 		testSet[firstPos] = bestPair[0];
@@ -195,7 +192,7 @@ function getCandidateSets () {
 	} // for each candidate testSet}
 	return candidateSets;
 }
-function countPairsCaptured(ts, unusedPairsSearch) {
+function countPairsCaptured(ts) {
 	var pairsCaptured = 0;
 	for (var i = 0, l = ts.length; i <= (l - 2); ++i) {
 		for (var j = i + 1; j <= (l - 1); ++j) {
@@ -209,9 +206,9 @@ function countPairsCaptured(ts, unusedPairsSearch) {
 function getBestCandidate (candidateSets) {
 // Iterate through candidateSets to determine the best candidate
 	var bestCandidate = candidateSets[0];
-	var mostPairsCaptured = countPairsCaptured(bestCandidate, unusedPairsSearch);
+	var mostPairsCaptured = countPairsCaptured(bestCandidate);
 	candidateSets.forEach(function (candidateSet){
-		var pairsCaptured = countPairsCaptured(candidateSet, unusedPairsSearch);
+		var pairsCaptured = countPairsCaptured(candidateSet);
 		if (pairsCaptured > mostPairsCaptured) {
 			mostPairsCaptured = pairsCaptured;
 			bestCandidate = candidateSet;
@@ -222,7 +219,7 @@ function getBestCandidate (candidateSets) {
 function removeUnusedPairs (v1, v2) {
 	unusedPairs.forEach(function (unusedPair, p) {
 		if ((unusedPair[0] === v1) && (unusedPair[1] === v2))	{
-			//console.log("Removing " + v1 + ", " + v2 + " from unusedPairs List[" + p + "]");
+			console.log("Removing " + v1 + ", " + v2 + " from unusedPairs List[" + p + "]");
 			unusedPairs.splice(p, 1);
 		}
 	});
@@ -272,12 +269,21 @@ function getTestSets () {
 	console.log("\nResult testsets: \n");
 	console.log(JSON.stringify(testSets));
     var testCases = getTestCases();
-	//console.log(JSON.stringify(allPairsDisplay));
+ 
+	var endTime = new Date();
     console.log(JSON.stringify(testCases));
     console.log("");
     console.log(testSets.length + " test cases produced");
 	
 	var minPairs = ((conditions[parameterCount - 1].length) * (conditions[parameterCount - 2].length));
     console.log("Efficiency ratio: " + Math.floor(100 * minPairs / testSets.length) + "%");
+    var clumsyTotal = 1;
+    parameterValueSets.forEach(function (pvs) {
+		clumsyTotal *= pvs.length;
+	});
+    console.log("All possible combinations: " + ("" + clumsyTotal).replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"));
+    console.log("Results generated in " + (endTime - startTime) + "ms");
+    console.log("unusedPairs: " + JSON.stringify(unusedPairs));
+    console.log("unusedPairsSearch: " + JSON.stringify(unusedPairsSearch));
     console.log("\nEnd\n");
 }
