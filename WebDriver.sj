@@ -4,7 +4,7 @@ var WD = {
     setup: {"desiredCapabilities": {
         "browserName": "internet explorer"
     }},
-    host: "192.168.10.172",
+    host: "<machine IP webdriver is running on>",
     port: 4444,//80,
     XHR: null,
     delay: 5e3,
