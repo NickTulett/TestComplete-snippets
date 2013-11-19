@@ -181,7 +181,7 @@ var WD = {
             index: index || 0,
             each: function WD_dummy_each(action, arg) {
             //provide a dummy each function, so API is consistent
-                Log.Message("each performing a single click");
+                Log.Message("each performing a single " + action);
                 return [this[action](arg)];
             },
             click: function WD_element_click() {
