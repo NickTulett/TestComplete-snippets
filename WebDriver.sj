@@ -4,7 +4,7 @@ var WD = {
     setup: {"desiredCapabilities": {
         "browserName": "internet explorer"
     }},
-    host: "<machine IP webdriver is running on>",
+    host: "<machine IP webdriver is running on>",//could be an adb host connected to an android device
     port: 4444,//80,
     XHR: null,
     delay: 5e3,
