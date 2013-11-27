@@ -61,7 +61,7 @@ function TEST_latency() {//test effect of latency on hitting landing page
     WPT.SETTINGS["label"] = "zero latency";
 
     testdetails = WPT.RUNTEST([
-        "navigate   http://www.blahblahblah.com/foobar"
+        "navigate   http://www.blahblahblah.com/login"
     ]);
     Log.Message(testdetails.data.userUrl);//results without latency - compare via the test history page
 }
