@@ -9,6 +9,7 @@ var WPT = {
         "&fvonly": "1",//first view only
         "f": "json",
         "video": "1"//record video for timelines and comparisons
+        "label": ""
     },    
     GET: function WD_GET(page, parms) {
         var testURL = [];
@@ -49,6 +50,7 @@ function TEST_latency() {//test effect of latency on hitting landing page
     WPT.SETTINGS["bwDown"] = "4000";
     WPT.SETTINGS["bwUp"] = "500";
     WPT.SETTINGS["latency"] = "300";
+    WPT.SETTINGS["label"] = "300ms latency";
 
     var testdetails = WPT.RUNTEST([
         "navigate   http://www.blahblahblah.com/login"
@@ -56,6 +58,7 @@ function TEST_latency() {//test effect of latency on hitting landing page
     Log.Message(testdetails.data.userUrl);//the results page (with latency)
 
     WPT.SETTINGS["latency"] = "00";
+    WPT.SETTINGS["label"] = "zero latency";
 
     testdetails = WPT.RUNTEST([
         "navigate   http://www.blahblahblah.com/foobar"
