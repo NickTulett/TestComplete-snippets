@@ -8,7 +8,7 @@ var WPT = {
         "runs": "1",
         "&fvonly": "1",//first view only
         "f": "json",
-        "video": "1"//record video for timelines and comparisons
+        "video": "1",//record video for timelines and comparisons
         "label": ""
     },    
     GET: function WD_GET(page, parms) {
