@@ -1,4 +1,4 @@
-//USEUNIT JSON (crockford's json2.js)
+//USEUNIT JSON (crockford's json2.js) if using TestComplete <11
 
 var winscp = {
     //download winscp and run the .exe to create a session
