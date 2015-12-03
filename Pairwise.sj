@@ -1,4 +1,4 @@
-//USEUNIT JSON (basically a copy of Crockfords json2.js)
+//USEUNIT JSON (basically a copy of Crockfords json2.js) if using TestComplete pre v.11
 //conversion of the java code from http://www.mcdowella.demon.co.uk/allPairs.html
 
 function generateTests() { 
